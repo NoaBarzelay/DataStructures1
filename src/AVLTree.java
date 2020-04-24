@@ -1,3 +1,5 @@
+import java.util.Stack;
+
 /**
  *
  * AVLTree
@@ -11,6 +13,8 @@ public class AVLTree {
 
 	IAVLNode root;
 	int size;
+	IAVLNode min;
+	IAVLNode max;
 	
   /**
    * public boolean empty()
@@ -132,6 +136,13 @@ public class AVLTree {
 		   }
 	   }
 	   curNode = new AVLNode(new Item(k, i), parentNode, 0);
+	   this.size += 1;
+	   if (this.min == null || this.min.getKey() > k) {
+		   this.min = curNode;
+	   }
+	   if (this.max == null || this.max.getKey() < k) {
+		   this.max = curNode;
+	   }
 	   if (parentNode == null) {
 		   this.root = curNode;
 		   return 0;
@@ -234,7 +245,25 @@ public class AVLTree {
 	   if (deleteNode == null) {
 		   return -1;
 	   }
-	   else if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
+	   this.size -= 1;
+	   if (deleteNode == this.min) {
+		   if (deleteNode.getRight() != null) {
+			   this.min = deleteNode.getRight();
+		   }
+		   else {
+			   this.min = deleteNode.getParent();
+		   }
+	   }
+	   if (deleteNode == this.max) {
+		   if ( deleteNode.getLeft() != null) {
+			   this.max = deleteNode.getLeft();
+		   }
+		   else {
+			   this.max = deleteNode.getParent();
+		   }
+	   }
+	   IAVLNode parentNode = deleteNode.getParent();
+	   if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
 		   this.byPass(deleteNode, null);
 	   }
 	   else if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
@@ -246,9 +275,47 @@ public class AVLTree {
 		   this.byPass(successor, successor.getRight());
 		   this.replaceNode(deleteNode, successor);
 	   }
-	   
-	   
-	   return 42;	// to be replaced by student code
+	   int rotations = 0;
+	   while (parentNode != null) {
+		   int parentBF = ((AVLNode) parentNode).getBF();
+		   if (parentBF == -2) {
+			   int rightBF = ((AVLNode) parentNode.getRight()).getBF();
+			   if (rightBF == -1 || rightBF == 0) {
+				   this.RotateLeft(parentNode);
+				   rotations += 1;
+			   }
+			   else {
+				   this.RotateRight(parentNode.getRight());
+				   this.RotateLeft(parentNode);
+				   rotations += 2;
+			   }
+		   }
+		   else if (parentBF == 2) {
+			   int leftBF = ((AVLNode) parentNode.getLeft()).getBF();
+			   if (leftBF == 1 || leftBF == 0) {
+				   this.RotateRight(parentNode);
+				   rotations += 1;
+			   }
+			   else {
+				   this.RotateLeft(parentNode.getLeft());
+				   this.RotateRight(parentNode);
+				   rotations += 2;
+			   }
+		   }
+		   else {
+			   int leftHeight = (parentNode.getLeft() == null) ? -1 : parentNode.getLeft().getHeight();
+			   int rightHeight = (parentNode.getRight() == null) ? -1 : parentNode.getRight().getHeight();
+			   int newParentHeight = 1 + Math.max(leftHeight, rightHeight);
+			   if (newParentHeight == parentNode.getHeight()) {
+				   return rotations;
+			   }
+			   else {
+				   parentNode.setHeight(newParentHeight);
+				   parentNode = parentNode.getParent();
+			   }  
+		   }  
+	   }
+	   return rotations;
    }
 
    /**
@@ -259,7 +326,7 @@ public class AVLTree {
     */
    public String min()
    {
-	   return "42"; // to be replaced by student code
+	   return (this.min == null) ? null : this.min.getValue() ; 
    }
 
    /**
@@ -270,9 +337,18 @@ public class AVLTree {
     */
    public String max()
    {
-	   return "42"; // to be replaced by student code
+	   return (this.max == null) ? null : this.max.getValue() ;
    }
 
+   public int keysToArrayRec(int[] arr, IAVLNode node, int index)
+   {
+	   if (node != null) {
+		   index = keysToArrayRec(arr, node.getLeft(), index);
+		   arr[index++] = node.getKey();
+		   index = keysToArrayRec(arr, node.getRight(), index);
+	   }
+	   return index;
+   }
   /**
    * public int[] keysToArray()
    *
@@ -281,10 +357,20 @@ public class AVLTree {
    */
   public int[] keysToArray()
   {
-        int[] arr = new int[42]; // to be replaced by student code
-        return arr;              // to be replaced by student code
+	  int[] arr = new int[this.size];
+	  keysToArrayRec(arr, this.root, 0);
+	  return arr;
   }
 
+  public int infoToArrayRec(String[] arr, IAVLNode node, int index)
+  {
+	   if (node != null) {
+		   index = infoToArrayRec(arr, node.getLeft(), index);
+		   arr[index++] = node.getValue();
+		   index = infoToArrayRec(arr, node.getRight(), index);
+	   }
+	   return index;
+  }
   /**
    * public String[] infoToArray()
    *
@@ -294,8 +380,9 @@ public class AVLTree {
    */
   public String[] infoToArray()
   {
-        String[] arr = new String[42]; // to be replaced by student code
-        return arr;                    // to be replaced by student code
+	  String[] arr = new String[this.size];
+	  infoToArrayRec(arr, this.root, 0);
+	  return arr;
   }
 
    /**
