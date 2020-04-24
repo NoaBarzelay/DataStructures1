@@ -1,4 +1,3 @@
-import java.util.Stack;
 
 /**
  *
@@ -196,11 +195,13 @@ public class AVLTree {
    }
 
    public void byPass(IAVLNode deleteNode, IAVLNode child) {
-	   if (deleteNode.getParent().getLeft() == deleteNode) {
+	   if (deleteNode.getParent() != null && deleteNode.getParent().getLeft() == deleteNode) {
 		   deleteNode.getParent().setLeft(child);
 	   }
 	   else {
-		   deleteNode.getParent().setRight(child);
+		   if (deleteNode.getParent() != null) {
+			   deleteNode.getParent().setRight(child);
+		   }
 	   }
 	   if (child != null) {
 		   child.setParent(deleteNode.getParent());
@@ -213,8 +214,12 @@ public class AVLTree {
    public void replaceNode(IAVLNode deleteNode, IAVLNode replacer) {
 	   replacer.setRight(deleteNode.getRight());
 	   replacer.setLeft(deleteNode.getLeft());
-	   replacer.getRight().setParent(replacer);
-	   replacer.getLeft().setParent(replacer);
+	   if (replacer.getRight() != null){
+		   replacer.getRight().setParent(replacer);
+	   }
+	   if (replacer.getLeft() != null) {
+		   replacer.getLeft().setParent(replacer);
+	   }
 	   replacer.setParent(deleteNode.getParent());
 	   if (replacer.getParent() == null) {
 		   this.root = replacer;
@@ -264,11 +269,19 @@ public class AVLTree {
 	   }
 	   IAVLNode parentNode = deleteNode.getParent();
 	   if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
-		   this.byPass(deleteNode, null);
+		   if (deleteNode == this.root) {
+			   this.root = null;
+		   }
+		   else{
+			   this.byPass(deleteNode, null);
+		   }
 	   }
-	   else if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
+	   else if (deleteNode.getLeft() == null || deleteNode.getRight() == null) {
 		   IAVLNode child = (deleteNode.getLeft() == null) ? deleteNode.getRight() : deleteNode.getLeft();
-		   this.byPass(deleteNode, child);
+		   if (deleteNode == this.root) {
+			   this.root = child;
+			   this.byPass(deleteNode, child);
+		   }
 	   }
 	   else {
 		   IAVLNode successor = ((AVLNode) deleteNode).getSuccessor();
@@ -289,6 +302,7 @@ public class AVLTree {
 				   this.RotateLeft(parentNode);
 				   rotations += 2;
 			   }
+			   parentNode = parentNode.getParent();
 		   }
 		   else if (parentBF == 2) {
 			   int leftBF = ((AVLNode) parentNode.getLeft()).getBF();
@@ -301,12 +315,13 @@ public class AVLTree {
 				   this.RotateRight(parentNode);
 				   rotations += 2;
 			   }
+			   parentNode = parentNode.getParent();
 		   }
 		   else {
 			   int leftHeight = (parentNode.getLeft() == null) ? -1 : parentNode.getLeft().getHeight();
 			   int rightHeight = (parentNode.getRight() == null) ? -1 : parentNode.getRight().getHeight();
 			   int newParentHeight = 1 + Math.max(leftHeight, rightHeight);
-			   if (newParentHeight == parentNode.getHeight()) {
+			   if (newParentHeight == parentNode.getHeight() && rotations == 0) {
 				   return rotations;
 			   }
 			   else {
