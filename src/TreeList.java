@@ -7,6 +7,8 @@
  *
  */
  public class TreeList{
+	 
+	 AVLTree tree;
 	 /**
    * public Item retrieve(int i)
    *
@@ -15,7 +17,7 @@
    */
   public Item retrieve(int i)
   {
-	return null;  // to be replaced by student code
+	return tree.treeSelect(i+1);
   }
 
   /**
