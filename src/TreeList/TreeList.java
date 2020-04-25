@@ -41,7 +41,8 @@ import TreeList.AVLTree.IAVLNode;
 		   while (curNode.getRight() != null) {
 			   curNode = curNode.getRight();
 		   }
-		   curNode.setRight(tree.new AVLNode(new Item(k, s), curNode, 0)); 
+		   curNode.setRight(tree.new AVLNode(new Item(k, s), curNode, 0));
+		   tree.fixTree(curNode.getParent(), false);
 	   }
 	   else {
 		   IAVLNode curNode = tree.treeSelect(i+1);
@@ -49,23 +50,33 @@ import TreeList.AVLTree.IAVLNode;
 			   curNode.setLeft(tree.new AVLNode(new Item(k, s), curNode, 0));
 		   }
 		   else {
-			   
+			   IAVLNode predecessor = ((AVLTree.AVLNode) curNode).getPredecessor();
+			   curNode.setRight(predecessor.getRight());
+			   predecessor.getRight().setParent(curNode);
+			   curNode.setParent(predecessor);
+			   predecessor.setRight(curNode);
 		   }
+		   tree.fixTree(curNode.getParent(), false);
 	   }
-	   
-	   
-	  return 42;	// to be replaced by student code
+	   return 0;
    }
 
   /**
    * public int delete(int i)
    *
-   * deletes an item in the ith posittion from the list.
+   * deletes an item in the ith position from the list.
 	* returns -1 if i<0 or i>n-1 otherwise returns 0.
    */
    public int delete(int i)
    {
-	   return 42;	// to be replaced by student code
+	   if (i < 0 || i >= tree.size()) {
+		   return -1;
+	   }
+	   else {
+		   IAVLNode node = tree.treeSelect(i+1);
+		   tree.delete(node.getKey());
+		   return 0;
+	   } 
    }
 	  
  }
