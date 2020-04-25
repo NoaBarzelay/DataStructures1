@@ -11,7 +11,6 @@ package TreeList;
 public class AVLTree {
 
 	public IAVLNode root;
-	public int size;
 	public IAVLNode min;
 	public IAVLNode max;
 	
@@ -68,7 +67,7 @@ public class AVLTree {
   public void setSize(IAVLNode node) {
 	  int leftSize = (node.getLeft() == null) ? 0 : ((AVLNode) node.getLeft()).getSize();
 	  int rightSize = (node.getRight() == null) ? 0 : ((AVLNode) node.getRight()).getSize();
-	  ((AVLNode) node).setSize(leftSize + rightSize);
+	  ((AVLNode) node).setSize(leftSize + rightSize + 1);
   }
   
   public void RotateLeft(IAVLNode node) {
@@ -123,14 +122,14 @@ public class AVLTree {
   
   public int fixTree(IAVLNode node, boolean delete) {
 	  int rotations = 0;
-	   while (node != null) {
-		   int nodeBF = ((AVLNode) node).getBF();
-		   if (delete == true) {
-			   ((AVLNode) node).setSize(((AVLNode) node).getSize() - 1);
-		   }
-		   else {
-			   ((AVLNode) node).setSize(((AVLNode) node).getSize() + 1);
-		   }
+	  while (node != null) {
+		  int nodeBF = ((AVLNode) node).getBF();
+		  //if (delete == true) {
+			   //((AVLNode) node).setSize(((AVLNode) node).getSize() - 1);
+		 //''  }
+		  // else {
+		//	   ((AVLNode) node).setSize(((AVLNode) node).getSize() + 1);
+		  // }
 		   if (nodeBF == -2) {
 			   int rightBF = ((AVLNode) node.getRight()).getBF();
 			   if(this.getRoot()==node) {
@@ -162,6 +161,7 @@ public class AVLTree {
 			   }
 		   }
 		   setHeight(node);
+		   setSize(node);
 		   node = node.getParent();  
 	   }
 	   return rotations;
@@ -191,7 +191,6 @@ public class AVLTree {
 		   }
 	   }
 	   curNode = new AVLNode(new Item(k, i), parentNode, 0);
-	   this.size += 1;
 	   if (this.min == null || this.min.getKey() > k) {
 		   this.min = curNode;
 	   }
@@ -248,6 +247,7 @@ public class AVLTree {
 		   replacer.getParent().setRight(replacer);
 	   }
 	   setHeight(replacer);
+	   setSize(replacer);
 	   deleteNode.setLeft(null);
 	   deleteNode.setRight(null);
 	   deleteNode.setParent(null);
@@ -268,7 +268,6 @@ public class AVLTree {
 	   if (deleteNode == null) {
 		   return -1;
 	   }
-	   this.size -= 1;
 	   if (deleteNode == this.min) {
 		   if (deleteNode.getRight() != null) {
 			   this.min = deleteNode.getRight();
@@ -293,6 +292,7 @@ public class AVLTree {
 		   parentNode = successor.getParent();
 		   this.byPass(successor, successor.getRight());
 		   this.replaceNode(deleteNode, successor);
+		   fixTree(successor, true);
 	   }
 	   if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
 		   if (deleteNode == this.root) {
@@ -354,7 +354,7 @@ public class AVLTree {
    */
   public int[] keysToArray()
   {
-	  int[] arr = new int[this.size];
+	  int[] arr = new int[this.size()];
 	  keysToArrayRec(arr, this.root, 0);
 	  return arr;
   }
@@ -377,7 +377,7 @@ public class AVLTree {
    */
   public String[] infoToArray()
   {
-	  String[] arr = new String[this.size];
+	  String[] arr = new String[this.size()];
 	  infoToArrayRec(arr, this.root, 0);
 	  return arr;
   }
@@ -392,7 +392,12 @@ public class AVLTree {
     */
    public int size()
    {
-	   return size;
+	   if (root == null) {
+		   return 0;
+	   }
+	   else{
+		   return ((AVLNode) this.root).getSize();
+	   }
    }
    
      /**
