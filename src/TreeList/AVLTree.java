@@ -286,6 +286,14 @@ public class AVLTree {
 		   }
 	   }
 	   IAVLNode parentNode = deleteNode.getParent();
+	   
+	   
+	   if (deleteNode.getLeft() != null && deleteNode.getRight() != null) {
+		   IAVLNode successor = ((AVLNode) deleteNode).getSuccessor();
+		   parentNode = successor.getParent();
+		   this.byPass(successor, successor.getRight());
+		   this.replaceNode(deleteNode, successor);
+	   }
 	   if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
 		   if (deleteNode == this.root) {
 			   this.root = null;
@@ -296,7 +304,6 @@ public class AVLTree {
 		   else{
 			   this.byPass(deleteNode, null);
 		   }
-		   return fixTree(parentNode, true);
 	   }
 	   else if (deleteNode.getLeft() == null || deleteNode.getRight() == null) {
 		   IAVLNode child = (deleteNode.getLeft() == null) ? deleteNode.getRight() : deleteNode.getLeft();
@@ -304,14 +311,8 @@ public class AVLTree {
 			   this.root = child;
 		   }
 		   this.byPass(deleteNode, child);
-		   return fixTree(parentNode, true);
 	   }
-	   else {
-		   IAVLNode successor = ((AVLNode) deleteNode).getSuccessor();
-		   this.byPass(successor, successor.getRight());
-		   this.replaceNode(deleteNode, successor);
-		   return fixTree(successor, true);
-	   }
+	   return fixTree(parentNode, true);
    }
 
    /**

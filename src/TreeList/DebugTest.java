@@ -101,11 +101,7 @@ class DebugTest {
         if (node == null || node.getHeight() == 0) {
         	return true;
         }
-        else if (node.getRight() == null) {
-        	if (node.getLeft() == null) {
-        		System.out.print(node.getHeight());
-        		return true;
-        	}
+        else if (node.getRight() == null) {	        	
             boolean res = node.getLeft().getParent() == node;
             if (!res) System.out.println("node " + node.getValue() + "'s left child has wrong parent");
             return res && testParents(node.getLeft());
