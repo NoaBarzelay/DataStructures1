@@ -118,7 +118,7 @@ public class AVLTree {
 		}
 		newParent.setParent(node.getParent());
 		if (node.getParent() == null) {
-			this.root = newParent;
+			root = newParent;
 		}
 		else if (node.getParent().getLeft() == node) {
 			node.getParent().setLeft(newParent);
@@ -213,8 +213,17 @@ public class AVLTree {
 				curNode = curNode.getLeft();
 			}
 		}
-		//create node to insert and connect to parent
+		//create node to insert
 		curNode = new AVLNode(new Item(k, i), parentNode, 0);
+		//if k is smaller then tree.min or tree is empty then update min
+		if (empty() || min.getKey() > k) {
+			this.min = curNode;
+		}
+		// if k is bigger then tree.max or tree is empty then update max
+		if (empty() || max.getKey() < k) {
+			max = curNode;
+		}
+		//connect node to parent if exists else set as root
 		if (parentNode == null) {
 			this.root = curNode;
 			return 0;
@@ -225,209 +234,252 @@ public class AVLTree {
 		else {
 			parentNode.setLeft(curNode);
 		}
-		//if k is smaller then tree.min or tree is empty then update min
-		if (this.empty() || this.min.getKey() > k) {
-			this.min = curNode;
-		}
-		// if k is bigger then tree.max or tree is empty then update max
-		if (this.empty() || this.max.getKey() < k) {
-			this.max = curNode;
-		}
 		return fixTree(parentNode);
 	}
 
 	
-	
-   public void byPass(IAVLNode deleteNode, IAVLNode child) {
-	   if (deleteNode.getParent() != null && deleteNode.getParent().getLeft() == deleteNode) {
-		   deleteNode.getParent().setLeft(child);
-	   }
-	   else {
-		   if (deleteNode.getParent() != null) {
-			   deleteNode.getParent().setRight(child);
-		   }
-	   }
-	   if (child != null) {
-		   child.setParent(deleteNode.getParent());
-	   }
-	   deleteNode.setParent(null);
-	   deleteNode.setRight(null);
-	   deleteNode.setLeft(null);
-   }
+	/**
+	* public void byPass(IAVLNode deleteNode, IAVLNode child)
+	*
+	* given deleteNode and its child (deleteNode only has one child)
+	* byPasses deleteNode by making deleteNode.parent -> child.parent
+	* and disconnect deleteNode from tree
+	*
+	*/
+	public void byPass(IAVLNode deleteNode, IAVLNode child) 
+	{
+		if (deleteNode.getParent() != null && deleteNode.getParent().getLeft() == deleteNode) {
+			deleteNode.getParent().setLeft(child);
+		}
+		else {
+			if (deleteNode.getParent() != null) {
+				deleteNode.getParent().setRight(child);
+			}
+		}
+		if (child != null) {
+			child.setParent(deleteNode.getParent());
+		}
+		deleteNode.setParent(null);
+		deleteNode.setRight(null);
+		deleteNode.setLeft(null);
+	}
    
-   public void replaceNode(IAVLNode deleteNode, IAVLNode replacer) {
-	   replacer.setRight(deleteNode.getRight());
-	   replacer.setLeft(deleteNode.getLeft());
-	   if (replacer.getRight() != null){
-		   replacer.getRight().setParent(replacer);
-	   }
-	   if (replacer.getLeft() != null) {
-		   replacer.getLeft().setParent(replacer);
-	   }
-	   replacer.setParent(deleteNode.getParent());
-	   if (replacer.getParent() == null) {
-		   this.root = replacer;
-	   }
-	   else if (replacer.getParent().getLeft() == deleteNode) {
-		   replacer.getParent().setLeft(replacer);
-	   }
-	   else {
-		   replacer.getParent().setRight(replacer);
-	   }
-	   ((AVLNode) replacer).setHeightAndSize();
-	   deleteNode.setLeft(null);
-	   deleteNode.setRight(null);
-	   deleteNode.setParent(null);
-	   }
+	
+	/**
+	* public void replaceNode(IAVLNode deleteNode, IAVLNode replacer)
+	*
+	* replaces deleteNode with replacer in tree
+	*
+	*/
+	public void replaceNode(IAVLNode deleteNode, IAVLNode replacer) {
+		//set replacer's new connections
+		replacer.setRight(deleteNode.getRight());
+		replacer.setLeft(deleteNode.getLeft());
+		if (replacer.getRight() != null){
+			replacer.getRight().setParent(replacer);
+		}
+		if (replacer.getLeft() != null) {
+			replacer.getLeft().setParent(replacer);
+		}
+		replacer.setParent(deleteNode.getParent());
+		//set deleteNode's parent as replacer's parent
+		if (replacer.getParent() == null) {
+			root = replacer;
+		}
+		else if (replacer.getParent().getLeft() == deleteNode) {
+			replacer.getParent().setLeft(replacer);
+		}
+		else {
+			replacer.getParent().setRight(replacer);
+		}
+		((AVLNode) replacer).setHeightAndSize();
+		//disconnect deleteNode
+		deleteNode.setLeft(null);
+		deleteNode.setRight(null);
+		deleteNode.setParent(null);
+	   	}
       
    
-  /**
-   * public int delete(int k)
-   *
-   * deletes an item with key k from the binary tree, if it is there;
-   * the tree must remain valid (keep its invariants).
-   * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
-   * returns -1 if an item with key k was not found in the tree.
-   */
-   public int delete(int k)
-   {
-	   IAVLNode deleteNode = this.searchNode(k);
-	   if (deleteNode == null) {
-		   return -1;
-	   }
-	   if (deleteNode == this.min) {
-		   if (deleteNode.getRight() != null) {
-			   this.min = deleteNode.getRight();
-		   }
-		   else {
-			   this.min = deleteNode.getParent();
-		   }
-	   }
-	   if (deleteNode == this.max) {
-		   if ( deleteNode.getLeft() != null) {
-			   this.max = deleteNode.getLeft();
-		   }
-		   else {
-			   this.max = deleteNode.getParent();
-		   }
-	   }
-	   IAVLNode parentNode = deleteNode.getParent();
-	   
-	   
-	   if (deleteNode.getLeft() != null && deleteNode.getRight() != null) {
-		   IAVLNode successor = ((AVLNode) deleteNode).getSuccessor();
-		   parentNode = successor.getParent();
-		   this.byPass(successor, successor.getRight());
-		   this.replaceNode(deleteNode, successor);
-		   fixTree(successor);
-	   }
-	   if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
-		   if (deleteNode == this.root) {
-			   this.root = null;
-			   deleteNode.setParent(null);
-			   deleteNode.setLeft(null);
-			   deleteNode.setRight(null);
-		   }
-		   else{
-			   this.byPass(deleteNode, null);
-		   }
-	   }
-	   else if (deleteNode.getLeft() == null || deleteNode.getRight() == null) {
-		   IAVLNode child = (deleteNode.getLeft() == null) ? deleteNode.getRight() : deleteNode.getLeft();
-		   if (deleteNode == this.root) {
-			   this.root = child;
-		   }
-		   this.byPass(deleteNode, child);
-	   }
-	   return fixTree(parentNode);
-   }
+	/**
+   	* public int delete(int k)
+   	*
+   	* deletes an item with key k from the binary tree, if it is there;
+   	* the tree must remain valid (keep its invariants).
+   	* returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
+   	* returns -1 if an item with key k was not found in the tree.
+   	*/
+	public int delete(int k)
+	{
+		IAVLNode deleteNode = this.searchNode(k);
+		if (deleteNode == null) {
+			return -1;
+		}
+		//if deleteNode is min or max then update
+		if (deleteNode == min) {
+			if (deleteNode.getRight() != null) {
+				//deleteNode is min -> has no left child
+				//tree is AVL -> right child has no children
+				min = deleteNode.getRight();
+			}
+			else {
+				//deleteNode has no children -> new min is deleteNode.parent
+				min = deleteNode.getParent();
+			}
+		}
+		if (deleteNode == max) {
+			if ( deleteNode.getLeft() != null) {
+				//deleteNode is max -> has no right child
+				//tree is AVL -> left child has no children
+				max = deleteNode.getLeft();
+			}
+			else {
+				// deleteNode has no children -> new max is deleteNode.parent
+				max = deleteNode.getParent();
+			}
+		}
+		IAVLNode parentNode = deleteNode.getParent();
+		//if deleteNode has two children then find successor -> remove successor ->
+		//replace deleteNode with successor -> fix tree from deleteNode
+		if (deleteNode.getLeft() != null && deleteNode.getRight() != null) {
+			IAVLNode successor = ((AVLNode) deleteNode).getSuccessor();
+			parentNode = successor.getParent();
+			this.byPass(successor, successor.getRight());
+			this.replaceNode(deleteNode, successor);
+			fixTree(successor);
+		}
+		//if deleteNode is leaf then byPass (if root then remove instead)
+		if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
+			if (deleteNode == root) {
+				this.root = null;
+				deleteNode.setParent(null);
+				deleteNode.setLeft(null);
+				deleteNode.setRight(null);
+			}
+			else{
+				this.byPass(deleteNode, null);
+			}
+		}
+		//if deleteNode has one child then byPass with child
+		else if (deleteNode.getLeft() == null || deleteNode.getRight() == null) {
+			IAVLNode child = (deleteNode.getLeft() == null) ? deleteNode.getRight() : deleteNode.getLeft();
+			if (deleteNode == root) {
+				this.root = child;
+			}
+			this.byPass(deleteNode, child);
+		}
+		//fix tree from successor if deleteNode has two children
+		//or from delteNode otherwise
+		return fixTree(parentNode);
+	}
 
-   /**
+	
+    /**
     * public String min()
     *
     * Returns the info of the item with the smallest key in the tree,
     * or null if the tree is empty
     */
-   public String min()
-   {
-	   return (this.min == null) ? null : this.min.getValue() ; 
-   }
+	public String min()
+	{
+		return (this.min == null) ? null : this.min.getValue() ; 
+	}
 
-   /**
+	
+	/**
     * public String max()
     *
     * Returns the info of the item with the largest key in the tree,
     * or null if the tree is empty
     */
-   public String max()
-   {
-	   return (this.max == null) ? null : this.max.getValue() ;
-   }
+	public String max()
+	{
+		return (this.max == null) ? null : this.max.getValue() ;
+	}
 
-   public int keysToArrayRec(int[] arr, IAVLNode node, int index)
-   {
-	   if (node != null) {
-		   index = keysToArrayRec(arr, node.getLeft(), index);
-		   arr[index++] = node.getKey();
-		   index = keysToArrayRec(arr, node.getRight(), index);
-	   }
-	   return index;
-   }
-  /**
-   * public int[] keysToArray()
-   *
-   * Returns a sorted array which contains all keys in the tree,
-   * or an empty array if the tree is empty.
-   */
-  public int[] keysToArray()
-  {
-	  int[] arr = new int[this.size()];
-	  keysToArrayRec(arr, this.root, 0);
-	  return arr;
-  }
+	
+	/**
+	* public int keysToArrayRec(int[] arr, IAVLNode node, int index)
+	*
+	* recursive function which fills given array arr with keys by index going
+	* through tree by in-order traversal and returns next index to fill
+	*/
+	public int keysToArrayRec(int[] arr, IAVLNode node, int index)
+	{
+		if (node != null) {
+			index = keysToArrayRec(arr, node.getLeft(), index);
+			arr[index++] = node.getKey();
+			index = keysToArrayRec(arr, node.getRight(), index);
+		}
+		return index;
+	}
+	
+	
+	/**
+	* public int[] keysToArray()
+	*
+	* Returns a sorted array which contains all keys in the tree,
+	* or an empty array if the tree is empty.
+	*/
+	public int[] keysToArray()
+	{
+		int[] arr = new int[this.size()];
+		keysToArrayRec(arr, this.root, 0);
+		return arr;
+	}
 
-  public int infoToArrayRec(String[] arr, IAVLNode node, int index)
-  {
-	   if (node != null) {
-		   index = infoToArrayRec(arr, node.getLeft(), index);
-		   arr[index++] = node.getValue();
-		   index = infoToArrayRec(arr, node.getRight(), index);
-	   }
-	   return index;
-  }
-  /**
-   * public String[] infoToArray()
-   *
-   * Returns an array which contains all info in the tree,
-   * sorted by their respective keys,
-   * or an empty array if the tree is empty.
-   */
-  public String[] infoToArray()
-  {
-	  String[] arr = new String[this.size()];
-	  infoToArrayRec(arr, this.root, 0);
-	  return arr;
-  }
+	
+	/**
+	* public int infoToArrayRec(String[] arr, IAVLNode node, int index)
+	*
+	* recursive function which fills given array arr with info by index going
+	* through tree by in-order traversal and returns next index to fill
+	*/
+	public int infoToArrayRec(String[] arr, IAVLNode node, int index)
+	{
+		if (node != null) {
+			index = infoToArrayRec(arr, node.getLeft(), index);
+			arr[index++] = node.getValue();
+			index = infoToArrayRec(arr, node.getRight(), index);
+		}
+		return index;
+	}
+	
+	
+	/**
+	* public String[] infoToArray()
+	*
+	* Returns an array which contains all info in the tree,
+	* sorted by their respective keys,
+	* or an empty array if the tree is empty.
+	*/
+	public String[] infoToArray()
+	{
+		String[] arr = new String[this.size()];
+		infoToArrayRec(arr, this.root, 0);
+		return arr;
+	}
 
-   /**
-    * public int size()
-    *
-    * Returns the number of nodes in the tree.
-    *
-    * precondition: none
-    * postcondition: none
-    */
-   public int size()
-   {
-	   if (root == null) {
-		   return 0;
-	   }
-	   else{
-		   return ((AVLNode) this.root).getSize();
-	   }
-   }
+	
+	/**
+	* public int size()
+	*	
+	* Returns the number of nodes in the tree.
+	*
+	* precondition: none
+	* postcondition: none
+	*/
+	public int size()
+	{	
+		if (root == null) {
+			return 0;
+		}
+		else{
+			return ((AVLNode) this.root).getSize();
+		}
+	}
    
-     /**
+	
+    /**
     * public int getRoot()
     *
     * Returns the root AVL node, or null if the tree is empty
@@ -435,56 +487,89 @@ public class AVLTree {
     * precondition: none
     * postcondition: none
     */
-   public IAVLNode getRoot()
-   {
-	   return root;
-   }
+	public IAVLNode getRoot()
+	{
+		return root;
+	}
    
-   public void setRoot(IAVLNode node)
-   {
-	   this.root = node;
-   }
-   
-   public IAVLNode treeSelectRec(IAVLNode node, int rank) 
-   {
-	   int curRank = (node.getLeft() == null) ? 1 : (((AVLNode) node.getLeft()).getSize() + 1);
-	   if (curRank == rank) {
-		   return node;
-	   }
-	   else if (curRank > rank) {
-		   return treeSelectRec(node.getLeft(), rank);
-	   }
-	   else if (node.getRight() != null) {
-		   return treeSelectRec(node.getRight(), rank - curRank);
-	   }
-	   else {
-		   return null;
-	   }
-   }
-   
-   public IAVLNode treeSelect(int rank) 
-   {
-	   return treeSelectRec(root, rank);
-	   
-   }
-   
-   public int treeRank(IAVLNode node)
-   {
-	   int rank = 1 + ((AVLNode) node.getLeft()).getSize();
-	   while (node != null) {
-		   if (node.getParent() != null && node.getParent().getRight() == node) {
-			   rank += ((AVLNode) node.getParent().getLeft()).getSize() + 1;
-		   }
-		   node = node.getParent();
-	   }
-	   return rank;
-		   
-   }
-
+	
 	/**
-	   * public interface IAVLNode
-	   * ! Do not delete or modify this - otherwise all tests will fail !
-	   */
+	    * public void setRoot(IAVLNode node)
+	    *
+	    * sets the root AVL node
+	    *
+	    */
+	public void setRoot(IAVLNode node)
+	{
+		this.root = node;
+	}
+   
+	
+	/**
+	* public IAVLNode treeSelectRec(IAVLNode node, int rank) 
+	*
+	* recursive functions which goes down through tree
+	* and returns node with rank (== node.left.size + 1)
+	* if exists else null
+	*
+	*/
+	public IAVLNode treeSelectRec(IAVLNode node, int rank) 
+	{
+		//determine node's rank -> if equals given rank return node
+		// else move recursivly to child with possible equal rank
+		int curRank = (node.getLeft() == null) ? 1 : (((AVLNode) node.getLeft()).getSize() + 1);
+		if (curRank == rank) {
+			return node;
+		}
+		else if (curRank > rank) {
+			return treeSelectRec(node.getLeft(), rank);
+		}
+		else if (node.getRight() != null) {
+			return treeSelectRec(node.getRight(), rank - curRank);
+		}
+		else {
+			return null;
+		}
+	}
+   
+	
+	/**
+	* public IAVLNode treeSelect(int rank) 
+	*
+	* return node with given rank if exists in tree else null
+	*
+	*/
+	public IAVLNode treeSelect(int rank) 
+	{
+		return treeSelectRec(root, rank); 
+	}
+   
+	
+	/**
+	* public int treeRank(IAVLNode node)
+	*
+	* return rank of given node
+	*
+	*/
+	public int treeRank(IAVLNode node)
+	{
+		//compute initial rank
+		int rank = 1 + ((AVLNode) node.getLeft()).getSize();
+		//add to rank all nodes smaller then node which are in parent subtrees
+		while (node != null) {
+			if (node.getParent() != null && node.getParent().getRight() == node) {
+				rank += ((AVLNode) node.getParent().getLeft()).getSize() + 1;
+			}
+			node = node.getParent();
+		}
+		return rank;   
+	}
+
+	
+	/**
+	* public interface IAVLNode
+	* ! Do not delete or modify this - otherwise all tests will fail !
+	*/
 	public interface IAVLNode{	
 		public int getKey(); //returns node's key 
 		public String getValue(); //returns node's value [info]
@@ -498,18 +583,19 @@ public class AVLTree {
     	public int getHeight(); // Returns the height of the node 
 	}
 
-   /**
-   * public class AVLNode
-   *
-   * If you wish to implement classes other than AVLTree
-   * (for example AVLNode), do it in this file, not in 
-   * another file.
-   * This class can and must be modified.
-   * (It must implement IAVLNode)
-   */
-  public class AVLNode implements IAVLNode{
+	
+	/**
+    * public class AVLNode
+   	*
+   	* If you wish to implement classes other than AVLTree
+   	* (for example AVLNode), do it in this file, not in 
+   	* another file.
+   	* This class can and must be modified.
+   	* (It must implement IAVLNode)
+   	*/
+	public class AVLNode implements IAVLNode{
 	  
-	  
+		
 	  Item item;
 	  IAVLNode parent;
 	  IAVLNode left;
