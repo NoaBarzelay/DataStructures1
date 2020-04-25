@@ -42,7 +42,7 @@ import TreeList.AVLTree.IAVLNode;
 			   curNode = curNode.getRight();
 		   }
 		   curNode.setRight(tree.new AVLNode(new Item(k, s), curNode, 0));
-		   tree.fixTree(curNode.getParent(), false);
+		   tree.fixTree(curNode.getParent());
 	   }
 	   else {
 		   IAVLNode curNode = tree.treeSelect(i+1);
@@ -56,7 +56,7 @@ import TreeList.AVLTree.IAVLNode;
 			   curNode.setParent(predecessor);
 			   predecessor.setRight(curNode);
 		   }
-		   tree.fixTree(curNode.getParent(), false);
+		   tree.fixTree(curNode.getParent());
 	   }
 	   return 0;
    }
