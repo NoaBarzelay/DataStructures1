@@ -1,4 +1,4 @@
-
+package TreeList;
 /**
  *
  * AVLTree
@@ -427,6 +427,11 @@ public class AVLTree {
 	   return root;
    }
    
+   public void setRoot(IAVLNode node)
+   {
+	   this.root = node;
+   }
+   
    public IAVLNode treeSelectRec(IAVLNode node, int rank) 
    {
 	   int curRank = (node.getLeft() == null) ? 1 : (((AVLNode) node.getLeft()).getSize() + 1);
@@ -444,9 +449,9 @@ public class AVLTree {
 	   }
    }
    
-   public Item treeSelect(int rank) 
+   public IAVLNode treeSelect(int rank) 
    {
-	   return ((AVLNode) treeSelectRec(root, rank)).item;
+	   return treeSelectRec(root, rank);
 	   
    }
    
@@ -574,12 +579,32 @@ public class AVLTree {
 	    		return parent;
 	    	}
 	    }
+	    
+	    public IAVLNode getPredecessor() {
+	    	if (this.getLeft() != null) {
+	    		IAVLNode curNode = this.getLeft();
+	    		while (curNode.getRight() != null){
+	    			curNode = curNode.getRight();
+	    		}
+	    		return curNode;
+	    	}
+	    	else {
+	    		
+	    	}
+	    }
+	    
 	    public int getSize() 
 	    {
 	    	return size;
 	    }
+	    
 	    public void setSize(int size) {
 	    	this.size = size;
+	    }
+	    
+	    public Item getItem() 
+	    {
+	    	return item;
 	    }
   }
 }
