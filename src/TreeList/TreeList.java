@@ -10,7 +10,7 @@ import TreeList.AVLTree.IAVLNode;
  */
  public class TreeList{
 	 
-	 AVLTree tree;
+	 AVLTree tree = new AVLTree();
 	 /**
      * public Item retrieve(int i)
      *
@@ -49,14 +49,16 @@ import TreeList.AVLTree.IAVLNode;
 			 if (tree.size() == 0) {
 				 tree.setRoot(tree.new AVLNode(new Item(k, s), null, 0));
 			 }
-			 IAVLNode curNode = tree.getRoot();
-			 //find node in current last position and add to its right
-			 //then fix tree
-			 while (curNode.getRight() != null) {
-				 curNode = curNode.getRight();
+			 else {
+				 IAVLNode curNode = tree.getRoot();
+				 //find node in current last position and add to its right
+				 //then fix tree
+				 while (curNode.getRight() != null) {
+					 curNode = curNode.getRight();
+				 }
+				 curNode.setRight(tree.new AVLNode(new Item(k, s), curNode, 0));
+				 tree.fixTree(curNode);
 			 }
-			 curNode.setRight(tree.new AVLNode(new Item(k, s), curNode, 0));
-			 tree.fixTree(curNode.getParent());
 		 }
 		 else {
 			 //find node in current ith position
@@ -64,16 +66,16 @@ import TreeList.AVLTree.IAVLNode;
 			 //if no left son then add new node to its left
 			 if (curNode.getLeft() == null) {
 				 curNode.setLeft(tree.new AVLNode(new Item(k, s), curNode, 0));
+				 tree.fixTree(curNode);
 			 }
 			 //else find predecessor and add to its right
 			 else {
 				 IAVLNode predecessor = ((AVLTree.AVLNode) curNode).getPredecessor();
-				 curNode.setRight(predecessor.getRight());
-				 predecessor.getRight().setParent(curNode);
-				 curNode.setParent(predecessor);
-				 predecessor.setRight(curNode);
+				 predecessor.setRight(tree.new AVLNode(new Item(k, s), curNode, 0));
+				 predecessor.getRight().setParent(predecessor);
+				 tree.fixTree(predecessor);
 			 }
-			 tree.fixTree(curNode.getParent());
+			 
 		 }
 		 return 0;
 	 }
@@ -93,7 +95,7 @@ import TreeList.AVLTree.IAVLNode;
 		 else {
 			 //find node in ith position -> delete node
 			 IAVLNode node = tree.treeSelect(i+1);
-			 tree.delete(node.getKey());
+			 tree.deleteByNode(node);
 			 return 0;
 		 } 
 	 } 

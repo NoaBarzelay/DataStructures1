@@ -1,4 +1,5 @@
 package TreeList;
+
 /**
  *
  * AVLTree
@@ -7,19 +8,18 @@ package TreeList;
  * distinct integer keys and info
  *
  */
-
-public class AVLTree {
+public class AVLTree{
 
 	public IAVLNode root;
 	public IAVLNode min;
 	public IAVLNode max;
 	
-   /**
-   * public boolean empty()
-   *
-   * returns true if and only if the tree is empty
-   *
-   */
+    /**
+    * public boolean empty()
+    *
+    * returns true if and only if the tree is empty
+    *O(1)
+    */
 	public boolean empty() 
 	{
     return root == null;
@@ -30,7 +30,7 @@ public class AVLTree {
 	* public IAVLNode searchNode(int k)
 	*
 	* returns node with key k if exists else null
-	*
+	*O(log(n))
 	*/
 	public IAVLNode searchNode(int k)
 	{
@@ -59,6 +59,7 @@ public class AVLTree {
    *
    * returns the info of an item with key k if it exists in the tree
    * otherwise, returns null
+   * O(log(n))
    */
 	public String search(int k)
 	{
@@ -76,11 +77,14 @@ public class AVLTree {
 	* public void RotateLeft(IAVLNode node)
 	*
 	* rotates subtree of node the left
-	* 
+	* O(1)
 	*/
 	public void RotateLeft(IAVLNode node) 
 	{
 		IAVLNode newParent = node.getRight();
+		if (node == root) {
+			root = newParent;
+		}
 		node.setRight(newParent.getLeft());
 		if (newParent.getLeft() != null) {
 			newParent.getLeft().setParent(node);
@@ -107,11 +111,14 @@ public class AVLTree {
 	* public void RotateRight(IAVLNode node)
 	*
 	* rotates subtree of node to the right
-	* 
+	* O(1)
 	*/
 	public void RotateRight(IAVLNode node) 
 	{
 		IAVLNode newParent = node.getLeft();
+		if (node == root) {
+			root = newParent;
+		}
 		node.setLeft(newParent.getRight());
 		if (newParent.getRight() != null) {
 			newParent.getRight().setParent(node);
@@ -140,6 +147,7 @@ public class AVLTree {
 	* goes up the tree and updates height and sizes
 	* and if BF of node >2 or <-2 then rotates to fix
 	* returns number of rotations made
+	* O(log(n))
 	*/
 	public int fixTree(IAVLNode node) 
 	{
@@ -194,6 +202,7 @@ public class AVLTree {
     * the tree must remain valid (keep its invariants).
     * returns the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
     * returns -1 if an item with key k already exists in the tree.
+    * O(log(n))
     */
 	public int insert(int k, String i) 
 	{
@@ -244,7 +253,7 @@ public class AVLTree {
 	* given deleteNode and its child (deleteNode only has one child)
 	* byPasses deleteNode by making deleteNode.parent -> child.parent
 	* and disconnect deleteNode from tree
-	*
+	*O(1)
 	*/
 	public void byPass(IAVLNode deleteNode, IAVLNode child) 
 	{
@@ -269,10 +278,13 @@ public class AVLTree {
 	* public void replaceNode(IAVLNode deleteNode, IAVLNode replacer)
 	*
 	* replaces deleteNode with replacer in tree
-	*
+	*O(1)
 	*/
 	public void replaceNode(IAVLNode deleteNode, IAVLNode replacer) {
 		//set replacer's new connections
+		if (deleteNode == root) {
+			root = replacer;
+		}
 		replacer.setRight(deleteNode.getRight());
 		replacer.setLeft(deleteNode.getLeft());
 		if (replacer.getRight() != null){
@@ -299,21 +311,16 @@ public class AVLTree {
 		deleteNode.setParent(null);
 	   	}
       
-   
+	
 	/**
-   	* public int delete(int k)
+   	* public int deleteByNode(IAVLNode deleteNode)
    	*
-   	* deletes an item with key k from the binary tree, if it is there;
-   	* the tree must remain valid (keep its invariants).
+   	* deletes a given node that is in the tree while keeping tree balanced
    	* returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
    	* returns -1 if an item with key k was not found in the tree.
+   	* O(log(n))
    	*/
-	public int delete(int k)
-	{
-		IAVLNode deleteNode = this.searchNode(k);
-		if (deleteNode == null) {
-			return -1;
-		}
+	public int deleteByNode(IAVLNode deleteNode) {
 		//if deleteNode is min or max then update
 		if (deleteNode == min) {
 			if (deleteNode.getRight() != null) {
@@ -350,7 +357,7 @@ public class AVLTree {
 		//if deleteNode is leaf then byPass (if root then remove instead)
 		if (deleteNode.getLeft() == null && deleteNode.getRight() == null) {
 			if (deleteNode == root) {
-				this.root = null;
+				root = null;
 				deleteNode.setParent(null);
 				deleteNode.setLeft(null);
 				deleteNode.setRight(null);
@@ -363,13 +370,34 @@ public class AVLTree {
 		else if (deleteNode.getLeft() == null || deleteNode.getRight() == null) {
 			IAVLNode child = (deleteNode.getLeft() == null) ? deleteNode.getRight() : deleteNode.getLeft();
 			if (deleteNode == root) {
-				this.root = child;
+				root = child;
 			}
 			this.byPass(deleteNode, child);
 		}
 		//fix tree from successor if deleteNode has two children
 		//or from delteNode otherwise
 		return fixTree(parentNode);
+	}
+	
+	
+	/**
+   	* public int delete(int k)
+   	*
+   	* deletes an item with key k from the binary tree, if it is there;
+   	* the tree must remain valid (keep its invariants).
+   	* returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
+   	* returns -1 if an item with key k was not found in the tree.
+   	* O(log(n))
+   	*/
+	public int delete(int k)
+	{
+		IAVLNode deleteNode = this.searchNode(k);
+		if (deleteNode == null) {
+			return -1;
+		}
+		else {
+			return deleteByNode(deleteNode);
+		}
 	}
 
 	
@@ -378,6 +406,7 @@ public class AVLTree {
     *
     * Returns the info of the item with the smallest key in the tree,
     * or null if the tree is empty
+    * O(1)
     */
 	public String min()
 	{
@@ -390,6 +419,7 @@ public class AVLTree {
     *
     * Returns the info of the item with the largest key in the tree,
     * or null if the tree is empty
+    * O(1)
     */
 	public String max()
 	{
@@ -402,6 +432,7 @@ public class AVLTree {
 	*
 	* recursive function which fills given array arr with keys by index going
 	* through tree by in-order traversal and returns next index to fill
+	* O(n)
 	*/
 	public int keysToArrayRec(int[] arr, IAVLNode node, int index)
 	{
@@ -419,6 +450,7 @@ public class AVLTree {
 	*
 	* Returns a sorted array which contains all keys in the tree,
 	* or an empty array if the tree is empty.
+	* O(n)
 	*/
 	public int[] keysToArray()
 	{
@@ -433,6 +465,7 @@ public class AVLTree {
 	*
 	* recursive function which fills given array arr with info by index going
 	* through tree by in-order traversal and returns next index to fill
+	* O(n)
 	*/
 	public int infoToArrayRec(String[] arr, IAVLNode node, int index)
 	{
@@ -451,6 +484,7 @@ public class AVLTree {
 	* Returns an array which contains all info in the tree,
 	* sorted by their respective keys,
 	* or an empty array if the tree is empty.
+	* O(n)
 	*/
 	public String[] infoToArray()
 	{
@@ -467,6 +501,7 @@ public class AVLTree {
 	*
 	* precondition: none
 	* postcondition: none
+	* O(1)
 	*/
 	public int size()
 	{	
@@ -486,6 +521,7 @@ public class AVLTree {
     *
     * precondition: none
     * postcondition: none
+    * O(1)
     */
 	public IAVLNode getRoot()
 	{
@@ -497,7 +533,7 @@ public class AVLTree {
 	    * public void setRoot(IAVLNode node)
 	    *
 	    * sets the root AVL node
-	    *
+	    *O(1)
 	    */
 	public void setRoot(IAVLNode node)
 	{
@@ -511,7 +547,7 @@ public class AVLTree {
 	* recursive functions which goes down through tree
 	* and returns node with rank (== node.left.size + 1)
 	* if exists else null
-	*
+	*O(log(n))
 	*/
 	public IAVLNode treeSelectRec(IAVLNode node, int rank) 
 	{
@@ -537,7 +573,7 @@ public class AVLTree {
 	* public IAVLNode treeSelect(int rank) 
 	*
 	* return node with given rank if exists in tree else null
-	*
+	*O(log(n))
 	*/
 	public IAVLNode treeSelect(int rank) 
 	{
@@ -549,7 +585,7 @@ public class AVLTree {
 	* public int treeRank(IAVLNode node)
 	*
 	* return rank of given node
-	*
+	*O(log(n))
 	*/
 	public int treeRank(IAVLNode node)
 	{
@@ -603,97 +639,129 @@ public class AVLTree {
 	  int height;
 	  int size = 1;
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public AVLNode(Item item, IAVLNode parent, int height) 
 	  {
 		  this.item = item;
 		  this.height = height;
 		  this.parent = parent;
+		  this.size = 1;
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public int getKey()
 	  {
 		  return item.getKey(); 
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public String getValue()
 	  {
 		  return item.getInfo(); 
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public void setLeft(IAVLNode node)
 	  {
 		  left = node;
 		  return ;
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public IAVLNode getLeft()
 	  {
 		  return left;
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public void setRight(IAVLNode node)
 	  {
 		  right = node;
 		  return ; 
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public IAVLNode getRight()
 	  {
 		  return right; 
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+      */
 	  public void setParent(IAVLNode node)
 	  {
 		  this.parent = node;
 		  return ; 
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public IAVLNode getParent()
 	  {
 		  return parent;
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public void setHeight(int height)
 	  {
 		  this.height = height;
 		  return ; 
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public int getHeight()
 	  {
 		  return height; 
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public void setSize(int size)
 	  {
 		  this.size = size;
 		  return ;
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public int getSize() 
 	  {
 		  return size;
 	  }
 	  
+	  /**
+	  * O(1)
+	  */
 	  public Item getItem() 
 	  {
 		  return item;
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public int getBF()
 	  {
 		  //if left == null or right == null then height == -1
@@ -702,7 +770,9 @@ public class AVLTree {
 		  return leftHeight - rightHeight;
 	  }
 	  
-	  
+	  /**
+	  * O(log(n))
+	  */
 	  public IAVLNode getSuccessor() 
 	  {
 		  //if node has right subtree return it's leftmost node
@@ -726,7 +796,9 @@ public class AVLTree {
 		  }
 	  }  
 	  
-	  
+	  /**
+	  * O(log(n))
+	  */
 	  public IAVLNode getPredecessor() 
 	  {
 		  //if node has left subtree return it's rightmost node
@@ -750,7 +822,9 @@ public class AVLTree {
 		  }
 	  }
 	  
-	  
+	  /**
+	  * O(1)
+	  */
 	  public void setHeightAndSize() 
 	  {
 		  //set height of node as max of childern's height + 1
